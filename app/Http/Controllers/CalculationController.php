@@ -8,39 +8,47 @@ use Illuminate\Http\Request;
 class CalculationController extends Controller
 {
     /**
-     * Show the form for calculating.
+     * menapilkan form tampilan calculate"
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        return view('calculate');
+        return view('calculate');// Mengembalikan tampilan 'calculate'halaman depan yang berisi formulir input
     }
 
     /**
-     * Handle the calculation and store the data.
+     * menangani perhitungan rumus atau program dan menyimpan data
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
     {
+        //validasi input dari formulir
         $request->validate([
-            'name' => 'required|string',
-            'school' => 'required|string',
-            'age' => 'required|integer',
-            'address' => 'required|string',
-            'phone' => 'required|string',
-            'shape' => 'required|string',
-            'dimensions' => 'required|array'
+            'name' => 'required|string',        //Nama siswa
+            'school' => 'required|string',      //Nama sekolah
+            'age' => 'required|integer',        //Umur
+            'address' => 'required|string',     //Allamat
+            'phone' => 'required|string',       //nomer telepon
+            'shape' => 'required|string',       //Jenis bangun (misalnya, persegi, segitiga, dll
+            'dimensions' => 'required|array'    // Dimensi bangun (seperti panjang sisi, jari-jari, dll.)
         ]);
 
+        // Mengambil semua data dari formulir
         $data = $request->all();
+
+        // Mengonversi array dimensi menjadi JSON
         $data['dimensions'] = json_encode($data['dimensions']);
+
+        // Menghitung hasil berdasarkan bentuk dan dimensi
         $data['result'] = $this->calculateResult($data['shape'], $data['dimensions']);
 
+        // Menyimpan data ke database menggunakan model Calculation
         Calculation::create($data);
 
+        // Mengarahkan pengguna ke rute 'data.index' setelah penyimpanan berhasil
         return redirect()->route('data.index');
     }
 

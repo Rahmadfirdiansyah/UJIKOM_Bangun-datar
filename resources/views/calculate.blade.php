@@ -35,7 +35,7 @@
             </div>
             <div class="mb-3">
                 <label for="phone" class="form-label">Nomor Telepon:</label>
-                <input type="text" id="phone" name="phone" class="form-control" required>
+                <input type="number" id="phone" name="phone" class="form-control" required>
             </div>
             <h3 class="mb-3">Pilih Bangun</h3>
             <div class="mb-3">
@@ -53,6 +53,7 @@
                 <!-- Input dimensi akan ditambahkan secara dinamis dengan JavaScript -->
             </div>
             <button type="submit" class="btn btn-primary">Hitung</button>
+            <button type="button" onclick="tableToCSV()" class="btn btn-warning">download CSV</button>
         </form>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-+bZ4R1vV1HTnG3J3C5S3jOTyFVU4vjZ4zPR69rAkzS4JJZq8VqVVyea93sR0LXDO" crossorigin="anonymous">
@@ -96,6 +97,7 @@
                 dimensionsDiv.innerHTML = inputHTML;
             });
         </script>
+
     </div>
 </body>
 
