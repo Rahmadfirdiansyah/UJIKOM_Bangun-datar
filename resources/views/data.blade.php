@@ -3,7 +3,6 @@
 
 <head>
     <title>Data Penghitung</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -27,20 +26,19 @@
             <tbody>
                 @foreach ($calculations as $calculation)
                     <tr>
-                        <td>{{ $calculation->created_at->format('Y-m-d H:i:s') }}</td>
+                        <td>
+                            @if ($calculation->created_at)
+                                {{ $calculation->created_at->format('Y-m-d H:i:s') }}
+                            @else
+                                N/A
+                            @endif
+                        </td>
                         <td>{{ $calculation->name }}</td>
                         <td>{{ $calculation->school }}</td>
                         <td>{{ $calculation->age }}</td>
                         <td>{{ $calculation->address }}</td>
                         <td>{{ $calculation->phone }}</td>
-                        <td>
-                            {{ $calculation->shape }}:
-                            <ul>
-                                @foreach (json_decode($calculation->dimensions, true) as $key => $value)
-                                    <li>{{ ucfirst($key) }}: {{ $value }}</li>
-                                @endforeach
-                            </ul>
-                        </td>
+                        <td>{{ $calculation->result }}</td>
                     </tr>
                 @endforeach
             </tbody>

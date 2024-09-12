@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>Statistik Penghitung</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <title>Statistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="container">
         <header>
-            <h1>Statistik Penghitung</h1>
+            <h1>Statistics</h1>
         </header>
-        <?php
-        $totalCalculations = \App\Models\Calculation::count();
-        $shapeCounts = \App\Models\Calculation::
+        <div>
+            <h2>Total Penghitungan</h2>
+            <p>{{ $totalCalculations }}</p>
+
+            <h2>Persentase Penghitungan per Bangun</h2>
+            <ul>
+                @foreach ($shapePercentages as $shape => $percentage)
+                    <li>{{ ucfirst($shape) }}: {{ $percentage }}%</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

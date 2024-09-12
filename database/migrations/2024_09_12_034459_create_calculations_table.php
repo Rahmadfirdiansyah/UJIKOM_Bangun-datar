@@ -19,8 +19,9 @@ return new class extends Migration
             $table->string('address');
             $table->string('phone');
             $table->string('shape');
-            $table->text('dimensions');
-            $table->timestamps();
+            $table->json('dimensions'); // Menggunakan JSON untuk menyimpan dimensi
+            $table->string('result'); // Kolom untuk hasil perhitungan, pastikan tipe data sesuai
+            $table->timestamps(); // Menyimpan timestamp created_at dan updated_at
         });
     }
 

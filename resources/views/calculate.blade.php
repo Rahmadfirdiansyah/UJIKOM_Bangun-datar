@@ -63,28 +63,37 @@
                 var dimensionsDiv = document.getElementById('dimensions');
                 dimensionsDiv.innerHTML = '';
 
-                if (shape === 'square') {
-                    dimensionsDiv.innerHTML =
-                        '<label for="side" class="form-label">Panjang Sisi:</label><input type="number" id="side" name="dimensions[side]" class="form-control" required>';
+                var inputHTML = '';
+
+                if (shape === 'square' || shape === 'cube') {
+                    inputHTML = `
+                        <label for="side" class="form-label">Panjang Sisi:</label>
+                        <input type="number" id="side" name="dimensions[side]" class="form-control" required>
+                    `;
                 } else if (shape === 'triangle') {
-                    dimensionsDiv.innerHTML =
-                        '<label for="base" class="form-label">Panjang Alas:</label><input type="number" id="base" name="dimensions[base]" class="form-control" required>' +
-                        '<label for="height" class="form-label">Tinggi:</label><input type="number" id="height" name="dimensions[height]" class="form-control" required>';
-                } else if (shape === 'circle') {
-                    dimensionsDiv.innerHTML =
-                        '<label for="radius" class="form-label">Jari-Jari:</label><input type="number" id="radius" name="dimensions[radius]" class="form-control" required>';
-                } else if (shape === 'cube') {
-                    dimensionsDiv.innerHTML =
-                        '<label for="side" class="form-label">Panjang Sisi:</label><input type="number" id="side" name="dimensions[side]" class="form-control" required>';
+                    inputHTML = `
+                        <label for="base" class="form-label">Panjang Alas:</label>
+                        <input type="number" id="base" name="dimensions[base]" class="form-control" required>
+                        <label for="height" class="form-label">Tinggi:</label>
+                        <input type="number" id="height" name="dimensions[height]" class="form-control" required>
+                    `;
+                } else if (shape === 'circle' || shape === 'cylinder') {
+                    inputHTML = `
+                        <label for="radius" class="form-label">Jari-Jari:</label>
+                        <input type="number" id="radius" name="dimensions[radius]" class="form-control" required>
+                        <label for="height" class="form-label">Tinggi:</label>
+                        <input type="number" id="height" name="dimensions[height]" class="form-control" required>
+                    `;
                 } else if (shape === 'pyramid') {
-                    dimensionsDiv.innerHTML =
-                        '<label for="base_area" class="form-label">Luas Alas:</label><input type="number" id="base_area" name="dimensions[base_area]" class="form-control" required>' +
-                        '<label for="height" class="form-label">Tinggi:</label><input type="number" id="height" name="dimensions[height]" class="form-control" required>';
-                } else if (shape === 'cylinder') {
-                    dimensionsDiv.innerHTML =
-                        '<label for="radius" class="form-label">Jari-Jari:</label><input type="number" id="radius" name="dimensions[radius]" class="form-control" required>' +
-                        '<label for="height" class="form-label">Tinggi:</label><input type="number" id="height" name="dimensions[height]" class="form-control" required>';
+                    inputHTML = `
+                        <label for="base_area" class="form-label">Luas Alas:</label>
+                        <input type="number" id="base_area" name="dimensions[base_area]" class="form-control" required>
+                        <label for="height" class="form-label">Tinggi:</label>
+                        <input type="number" id="height" name="dimensions[height]" class="form-control" required>
+                    `;
                 }
+
+                dimensionsDiv.innerHTML = inputHTML;
             });
         </script>
     </div>
