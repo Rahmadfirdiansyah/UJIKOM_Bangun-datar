@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hitung Luas dan Volume</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
@@ -37,67 +36,107 @@
                 <label for="phone" class="form-label">Nomor Telepon:</label>
                 <input type="number" id="phone" name="phone" class="form-control" required>
             </div>
-            <h3 class="mb-3">Pilih Bangun</h3>
+
+            <h3 class="mb-3">Pilih Bangun Datar</h3>
             <div class="mb-3">
-                <label for="shape" class="form-label">Jenis Bangun:</label>
-                <select id="shape" name="shape" class="form-select">
+                <label for="flatShape" class="form-label">Jenis Bangun Datar:</label>
+                <select id="flatShape" name="flatShape" class="form-select">
+                    <option value="">Pilih Bangun Datar</option>
                     <option value="square">Persegi</option>
                     <option value="triangle">Segitiga</option>
                     <option value="circle">Lingkaran</option>
+                </select>
+            </div>
+
+            <div id="flatDimensions" class="mb-3">
+                <!-- Input dimensi bangun datar akan ditambahkan secara dinamis dengan JavaScript -->
+            </div>
+
+            <h3 class="mb-3">Pilih Bangun Ruang</h3>
+            <div class="mb-3">
+                <label for="solidShape" class="form-label">Jenis Bangun Ruang:</label>
+                <select id="solidShape" name="solidShape" class="form-select">
+                    <option value="">Pilih Bangun Ruang</option>
                     <option value="cube">Kubus</option>
                     <option value="pyramid">Limas</option>
                     <option value="cylinder">Tabung</option>
                 </select>
             </div>
-            <div id="dimensions" class="mb-3">
-                <!-- Input dimensi akan ditambahkan secara dinamis dengan JavaScript -->
+
+            <div id="solidDimensions" class="mb-3">
+                <!-- Input dimensi bangun ruang akan ditambahkan secara dinamis dengan JavaScript -->
             </div>
+
             <button type="submit" class="btn btn-primary">Hitung</button>
-            <button type="button" onclick="tableToCSV()" class="btn btn-warning">download CSV</button>
+            <div class="text-center mt-3">
+                <a href="{{ route('stats') }}" class="btn btn-danger">Lihat Statistik</a>
+            </div>
         </form>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-+bZ4R1vV1HTnG3J3C5S3jOTyFVU4vjZ4zPR69rAkzS4JJZq8VqVVyea93sR0LXDO" crossorigin="anonymous">
-        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            document.getElementById('shape').addEventListener('change', function() {
+            // Event listener untuk Bangun Datar
+            document.getElementById('flatShape').addEventListener('change', function() {
                 var shape = this.value;
-                var dimensionsDiv = document.getElementById('dimensions');
-                dimensionsDiv.innerHTML = '';
+                var flatDimensionsDiv = document.getElementById('flatDimensions');
+                flatDimensionsDiv.innerHTML = '';
 
                 var inputHTML = '';
 
-                if (shape === 'square' || shape === 'cube') {
+                if (shape === 'square') {
                     inputHTML = `
-                        <label for="side" class="form-label">Panjang Sisi:</label>
-                        <input type="number" id="side" name="dimensions[side]" class="form-control" required>
+                        <label for="side" class="form-label">Panjang Sisi (Persegi):</label>
+                        <input type="number" id="side" name="flatDimensions[side]" class="form-control" required>
                     `;
                 } else if (shape === 'triangle') {
                     inputHTML = `
-                        <label for="base" class="form-label">Panjang Alas:</label>
-                        <input type="number" id="base" name="dimensions[base]" class="form-control" required>
-                        <label for="height" class="form-label">Tinggi:</label>
-                        <input type="number" id="height" name="dimensions[height]" class="form-control" required>
+                        <label for="base" class="form-label">Panjang Alas (Segitiga):</label>
+                        <input type="number" id="base" name="flatDimensions[base]" class="form-control" required>
+                        <label for="height" class="form-label">Tinggi (Segitiga):</label>
+                        <input type="number" id="height" name="flatDimensions[height]" class="form-control" required>
                     `;
-                } else if (shape === 'circle' || shape === 'cylinder') {
+                } else if (shape === 'circle') {
                     inputHTML = `
-                        <label for="radius" class="form-label">Jari-Jari:</label>
-                        <input type="number" id="radius" name="dimensions[radius]" class="form-control" required>
-                        <label for="height" class="form-label">Tinggi:</label>
-                        <input type="number" id="height" name="dimensions[height]" class="form-control" required>
-                    `;
-                } else if (shape === 'pyramid') {
-                    inputHTML = `
-                        <label for="base_area" class="form-label">Luas Alas:</label>
-                        <input type="number" id="base_area" name="dimensions[base_area]" class="form-control" required>
-                        <label for="height" class="form-label">Tinggi:</label>
-                        <input type="number" id="height" name="dimensions[height]" class="form-control" required>
+                        <label for="radius" class="form-label">Jari-Jari (Lingkaran):</label>
+                        <input type="number" id="radius" name="flatDimensions[radius]" class="form-control" required>
                     `;
                 }
 
-                dimensionsDiv.innerHTML = inputHTML;
+                flatDimensionsDiv.innerHTML = inputHTML;
+            });
+
+            // Event listener untuk Bangun Ruang
+            document.getElementById('solidShape').addEventListener('change', function() {
+                var shape = this.value;
+                var solidDimensionsDiv = document.getElementById('solidDimensions');
+                solidDimensionsDiv.innerHTML = '';
+
+                var inputHTML = '';
+
+                if (shape === 'cube') {
+                    inputHTML = `
+                        <label for="side" class="form-label">Panjang Sisi (Kubus):</label>
+                        <input type="number" id="side" name="solidDimensions[side]" class="form-control" required>
+                    `;
+                } else if (shape === 'pyramid') {
+                    inputHTML = `
+                        <label for="base_area" class="form-label">Luas Alas (Limas):</label>
+                        <input type="number" id="base_area" name="solidDimensions[base_area]" class="form-control" required>
+                        <label for="height" class="form-label">Tinggi (Limas):</label>
+                        <input type="number" id="height" name="solidDimensions[height]" class="form-control" required>
+                    `;
+                } else if (shape === 'cylinder') {
+                    inputHTML = `
+                        <label for="radius" class="form-label">Jari-Jari (Tabung):</label>
+                        <input type="number" id="radius" name="solidDimensions[radius]" class="form-control" required>
+                        <label for="height" class="form-label">Tinggi (Tabung):</label>
+                        <input type="number" id="height" name="solidDimensions[height]" class="form-control" required>
+                    `;
+                }
+
+                solidDimensionsDiv.innerHTML = inputHTML;
             });
         </script>
-
     </div>
 </body>
 
