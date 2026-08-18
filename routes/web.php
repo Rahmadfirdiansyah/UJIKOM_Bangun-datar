@@ -19,5 +19,3 @@ Route::post('/store', [CalculationController::class, 'store'])->name('calculate.
 Route::get('/data', [CalculationController::class, 'show'])->name('data.index');
 Route::get('/data/sort', [CalculationController::class, 'sort'])->name('data.sort');
 Route::get('/stats', [CalculationController::class, 'stats'])->name('stats.index');
-route::get('/data/sort', [CalculationController::class, 'sort'])->name('data.sort');
-route::get('/stats', [CalculationController::class, 'stats'])->name('stats');

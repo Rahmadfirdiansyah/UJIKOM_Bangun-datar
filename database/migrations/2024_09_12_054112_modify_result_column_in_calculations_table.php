@@ -14,8 +14,15 @@ return new class extends Migration
     public function up()
     {
         Schema::table('calculations', function (Blueprint $table) {
-            $table->text('result')->change(); // Mengubah kolom 'result' menjadi tipe TEXT
+                      // Pastikan kolom 'result' ada sebelum mencoba mengubahnya
+            if (Schema::hasColumn('calculations', 'result')) {
+                $table->text('result')->change();
+            }
+            
+            // Modifikasi kolom 'shape'
+            $table->string('shape')->default('unknown')->change();
         });
+            
     }
 
     /**
@@ -26,7 +33,8 @@ return new class extends Migration
     public function down()
     {
         Schema::table('calculations', function (Blueprint $table) {
-            $table->string('result')->change(); // Mengembalikan ke tipe STRING jika diperlukan
+            $table->string('result')->nullable()->change(); // Kembalikan perubahan jika perlu
+            $table->string('shape')->default(null)->change();
         });
     }
 

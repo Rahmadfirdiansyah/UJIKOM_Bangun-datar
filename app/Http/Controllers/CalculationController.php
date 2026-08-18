@@ -10,73 +10,70 @@ class CalculationController extends Controller
     /**
      * Menampilkan form tampilan calculate.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function index()
     {
-        return view('calculate'); // Mengembalikan tampilan 'calculate' halaman depan yang berisi formulir input
+        return view('calculate');
     }
 
     /**
-     * Menangani perhitungan rumus atau program dan menyimpan data.
+     * Menangani perhitungan rumus dan menyimpan data.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
         // Validasi input dari formulir
         $request->validate([
-            'name' => 'required|string',
-            'school' => 'required|string',
-            'age' => 'required|integer',
+            'name' => 'required|string|max:255',
+            'school' => 'required|string|max:255',
+            'age' => 'required|integer|min:1|max:120',
             'address' => 'required|string',
-            'phone' => 'required|string',
-            'flatShape' => 'nullable|string',      // Jenis bangun datar
-            'solidShape' => 'nullable|string',     // Jenis bangun ruang
-            'flatDimensions' => 'nullable|array',  // Dimensi bangun datar
-            'solidDimensions' => 'nullable|array', // Dimensi bangun ruang
+            'phone' => 'required|string|max:20',
+            'flatShape' => 'nullable|string',
+            'solidShape' => 'nullable|string',
+            'flatDimensions' => 'nullable|array',
+            'solidDimensions' => 'nullable|array',
         ]);
 
-        // Mengambil data dari input formulir
         $data = $request->all();
 
-        // Proses penyimpanan bangun datar (jika ada)
-        if ($request->filled('flatShape')) {
-            $flatData = [
-                'name' => $data['name'],
-                'school' => $data['school'],
-                'age' => $data['age'],
-                'address' => $data['address'],
-                'phone' => $data['phone'],
-                'shape' => $data['flatShape'],
-                'dimensions' => json_encode($data['flatDimensions']),
-                'result' => $this->calculateResult($data['flatShape'], $data['flatDimensions']),
-            ];
-            Calculation::create($flatData);
+        $calculationData = [
+            'name' => $data['name'],
+            'school' => $data['school'],
+            'age' => $data['age'],
+            'address' => $data['address'],
+            'phone' => $data['phone'],
+            'bangun_datar' => null,
+            'bangun_ruang' => null,
+            'result' => '-',
+        ];
+
+        if ($request->filled('flatShape') && isset($data['flatDimensions'])) {
+            $calculationData['bangun_datar'] = $this->calculateResult($data['flatShape'], $data['flatDimensions']);
         }
 
-        // Proses penyimpanan bangun ruang (jika ada)
-        if ($request->filled('solidShape')) {
-            $solidData = [
-                'name' => $data['name'],
-                'school' => $data['school'],
-                'age' => $data['age'],
-                'address' => $data['address'],
-                'phone' => $data['phone'],
-                'shape' => $data['solidShape'],
-                'dimensions' => json_encode($data['solidDimensions']),
-                'result' => $this->calculateResult($data['solidShape'], $data['solidDimensions']),
-            ];
-            Calculation::create($solidData);
+        if ($request->filled('solidShape') && isset($data['solidDimensions'])) {
+            $calculationData['bangun_ruang'] = $this->calculateResult($data['solidShape'], $data['solidDimensions']);
         }
 
-        // Redirect ke rute yang sesuai setelah data berhasil disimpan
-        return redirect()->route('data.index')->with('success', 'Data perhitungan berhasil disimpan');
+        // Set kolom 'result' sebagai penggabungan hasil kalkulasi
+        $resultsList = array_filter([
+            $calculationData['bangun_datar'],
+            $calculationData['bangun_ruang'],
+        ]);
+
+        $calculationData['result'] = !empty($resultsList) ? implode(' | ', $resultsList) : 'Tanpa Perhitungan';
+
+        Calculation::create($calculationData);
+
+        return redirect()->route('data.index')->with('success', 'Data perhitungan berhasil disimpan!');
     }
 
     /**
-     * Calculate the result based on shape and dimensions.
+     * Memproses kalkulasi hasil berdasarkan bentuk dan dimensi.
      *
      * @param string $shape
      * @param array $dimensions
@@ -86,37 +83,40 @@ class CalculationController extends Controller
     {
         switch ($shape) {
             case 'square':
-                $side = $dimensions['side'];
+                $side = floatval($dimensions['side'] ?? 0);
                 $area = $side * $side;
-                return "Luas: $area";
+                return "Persegi (s = {$side}) → Luas: {$area}";
 
             case 'triangle':
-                $base = $dimensions['base'];
-                $height = $dimensions['height'];
+                $base = floatval($dimensions['base'] ?? 0);
+                $height = floatval($dimensions['height'] ?? 0);
                 $area = 0.5 * $base * $height;
-                return "Luas: $area";
+                return "Segitiga (a = {$base}, t = {$height}) → Luas: {$area}";
 
             case 'circle':
-                $radius = $dimensions['radius'];
+                $radius = floatval($dimensions['radius'] ?? 0);
                 $area = pi() * $radius * $radius;
-                return "Luas: $area";
+                $areaFormatted = round($area, 2);
+                return "Lingkaran (r = {$radius}) → Luas: {$areaFormatted}";
 
             case 'cube':
-                $side = $dimensions['side'];
+                $side = floatval($dimensions['side'] ?? 0);
                 $volume = $side * $side * $side;
-                return "Volume: $volume";
+                return "Kubus (s = {$side}) → Volume: {$volume}";
 
             case 'pyramid':
-                $baseArea = $dimensions['base_area'];
-                $height = $dimensions['height'];
+                $baseArea = floatval($dimensions['base_area'] ?? 0);
+                $height = floatval($dimensions['height'] ?? 0);
                 $volume = (1/3) * $baseArea * $height;
-                return "Volume: $volume";
+                $volumeFormatted = round($volume, 2);
+                return "Limas (La = {$baseArea}, t = {$height}) → Volume: {$volumeFormatted}";
 
             case 'cylinder':
-                $radius = $dimensions['radius'];
-                $height = $dimensions['height'];
+                $radius = floatval($dimensions['radius'] ?? 0);
+                $height = floatval($dimensions['height'] ?? 0);
                 $volume = pi() * $radius * $radius * $height;
-                return "Volume: $volume";
+                $volumeFormatted = round($volume, 2);
+                return "Tabung (r = {$radius}, t = {$height}) → Volume: {$volumeFormatted}";
 
             default:
                 return "Hasil tidak valid";
@@ -124,62 +124,87 @@ class CalculationController extends Controller
     }
 
     /**
-     * Display a listing of the data.
+     * Menampilkan daftar data perhitungan.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function show()
     {
-        $calculations = Calculation::all();
+        $calculations = Calculation::latest()->get();
         return view('data', compact('calculations'));
     }
 
     /**
-     * Sort the data based on a given column.
+     * Mengurutkan data berdasarkan kolom tertentu.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function sort(Request $request)
     {
         $sortBy = $request->input('sort_by', 'created_at');
-        $calculations = Calculation::orderBy($sortBy)->get();
+        $allowedSorts = ['created_at', 'name', 'school', 'age', 'address', 'phone', 'bangun_datar', 'bangun_ruang', 'result'];
+        
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+
+        $calculations = Calculation::orderBy($sortBy, 'desc')->get();
         return view('data', compact('calculations'));
     }
 
     /**
-     * Display statistics based on calculations.
+     * Menampilkan statistik perhitungan.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      */
     public function stats()
     {
-        // Mengambil semua data perhitungan
         $calculations = Calculation::all();
-        
-        // Jumlah total penghitungan luas dan volume yang sudah dilakukan
         $totalCalculations = $calculations->count();
 
-        // Mengelompokkan berdasarkan jenis bangun (datar atau ruang)
-        $flatShapes = ['square', 'triangle', 'circle']; // Bangun datar
-        $solidShapes = ['cube', 'pyramid', 'cylinder']; // Bangun ruang
+        $flatCount = $calculations->whereNotNull('bangun_datar')->where('bangun_datar', '!=', '')->count();
+        $solidCount = $calculations->whereNotNull('bangun_ruang')->where('bangun_ruang', '!=', '')->count();
 
-        // Mengelompokkan dan menghitung jumlah masing-masing bentuk
-        $shapeCounts = $calculations->groupBy('shape')->map->count();
-
-        // Menghitung persentase untuk bangun datar
-        $flatCount = $calculations->whereIn('shape', $flatShapes)->count();
         $flatPercentage = $totalCalculations > 0 ? ($flatCount / $totalCalculations) * 100 : 0;
-
-        // Menghitung persentase untuk bangun ruang
-        $solidCount = $calculations->whereIn('shape', $solidShapes)->count();
         $solidPercentage = $totalCalculations > 0 ? ($solidCount / $totalCalculations) * 100 : 0;
 
-        // Menghitung persentase masing-masing bentuk
-        $shapePercentages = $shapeCounts->map(function ($count) use ($totalCalculations) {
+        $shapeCounts = [
+            'Persegi' => 0,
+            'Segitiga' => 0,
+            'Lingkaran' => 0,
+            'Kubus' => 0,
+            'Limas' => 0,
+            'Tabung' => 0,
+        ];
+
+        foreach ($calculations as $item) {
+            if (!empty($item->bangun_datar)) {
+                $str = strtolower($item->bangun_datar);
+                if (str_contains($str, 'persegi') || str_contains($str, 'square')) {
+                    $shapeCounts['Persegi']++;
+                } elseif (str_contains($str, 'segitiga') || str_contains($str, 'triangle')) {
+                    $shapeCounts['Segitiga']++;
+                } elseif (str_contains($str, 'lingkaran') || str_contains($str, 'circle')) {
+                    $shapeCounts['Lingkaran']++;
+                }
+            }
+            if (!empty($item->bangun_ruang)) {
+                $str = strtolower($item->bangun_ruang);
+                if (str_contains($str, 'kubus') || str_contains($str, 'cube')) {
+                    $shapeCounts['Kubus']++;
+                } elseif (str_contains($str, 'limas') || str_contains($str, 'pyramid')) {
+                    $shapeCounts['Limas']++;
+                } elseif (str_contains($str, 'tabung') || str_contains($str, 'cylinder')) {
+                    $shapeCounts['Tabung']++;
+                }
+            }
+        }
+
+        $shapePercentages = collect($shapeCounts)->map(function ($count) use ($totalCalculations) {
             return $totalCalculations > 0 ? ($count / $totalCalculations) * 100 : 0;
         });
 
-        return view('stats', compact('totalCalculations', 'flatPercentage', 'solidPercentage', 'shapeCounts', 'shapePercentages'));
+        return view('stats', compact('totalCalculations', 'flatCount', 'solidCount', 'flatPercentage', 'solidPercentage', 'shapeCounts', 'shapePercentages'));
     }
 }

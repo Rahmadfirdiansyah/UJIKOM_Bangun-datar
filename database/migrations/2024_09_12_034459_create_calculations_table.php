@@ -18,10 +18,11 @@ return new class extends Migration
             $table->integer('age');
             $table->string('address');
             $table->string('phone');
-            $table->string('shape');
-            $table->json('dimensions'); // Menggunakan JSON untuk menyimpan dimensi
-            $table->string('result'); // Kolom untuk hasil perhitungan, pastikan tipe data sesuai
+            $table->json('dimensions')->nullable(); // Mengizinkan nilai null            $table->string('result'); // Kolom untuk hasil perhitungan, pastikan tipe data sesuai
+            $table->string('bangun_datar')->nullable();
+            $table->string('bangun_ruang')->nullable();
             $table->timestamps(); // Menyimpan timestamp created_at dan updated_at
+            $table->string('shape')->nullable();         // Tambahkan kolom 'shape'
         });
     }
 

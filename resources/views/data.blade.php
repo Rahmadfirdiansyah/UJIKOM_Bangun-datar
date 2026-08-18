@@ -1,177 +1,276 @@
-<!DOCTYPE html>
-<html>
+@extends('layouts.app')
 
-<head>
-    <title>Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        function sortTable(n) {
-            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-            table = document.getElementById("data-table");
-            switching = true;
-            dir = "asc"; // Set the sorting direction to ascending initially
+@section('title', 'Data Dashboard Perhitungan')
 
-            while (switching) {
-                switching = false;
-                rows = table.rows;
+@section('content')
+<div class="space-y-6">
+    <!-- Header Title & Action Buttons -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard Perhitungan</h1>
+            <p class="text-xs text-slate-500 mt-1">Daftar riwayat seluruh kalkulasi bangun datar dan bangun ruang siswa</p>
+        </div>
 
-                // Loop through all table rows (except the headers)
-                for (i = 1; i < (rows.length - 1); i++) {
-                    shouldSwitch = false;
+        <div class="flex items-center gap-3">
+            <button onclick="exportTableToCSV('data-perhitungan.csv')" 
+                    class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-file-csv text-base"></i> Export CSV
+            </button>
+            <a href="{{ route('calculate.index') }}" 
+               class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Hitung Baru
+            </a>
+        </div>
+    </div>
 
-                    x = rows[i].getElementsByTagName("TD")[n];
-                    y = rows[i + 1].getElementsByTagName("TD")[n];
+    <!-- Metrics Overview Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Data</p>
+                <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ count($calculations) }}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                <i class="fa-solid fa-database text-lg"></i>
+            </div>
+        </div>
 
-                    // If sorting column is the age column (index 3), sort numerically
-                    if (n === 3) {
-                        if (dir === "asc") {
-                            if (parseInt(x.innerHTML) > parseInt(y.innerHTML)) {
-                                shouldSwitch = true;
-                                break;
-                            }
-                        } else if (dir === "desc") {
-                            if (parseInt(x.innerHTML) < parseInt(y.innerHTML)) {
-                                shouldSwitch = true;
-                                break;
-                            }
-                        }
-                    } else {
-                        // Sort alphabetically for other columns
-                        if (dir === "asc") {
-                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-                                shouldSwitch = true;
-                                break;
-                            }
-                        } else if (dir === "desc") {
-                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-                                shouldSwitch = true;
-                                break;
-                            }
-                        }
-                    }
-                }
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Sekolah</p>
+                <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ $calculations->pluck('school')->unique()->count() }}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                <i class="fa-solid fa-school text-lg"></i>
+            </div>
+        </div>
 
-                if (shouldSwitch) {
-                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-                    switching = true;
-                    switchcount++;
-                } else {
-                    // If no switching has been done AND the direction is "asc", set the direction to "desc" and run the loop again.
-                    if (switchcount === 0 && dir === "asc") {
-                        dir = "desc";
-                        switching = true;
-                    }
-                }
-            }
-        }
-    </script>
-</head>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bangun Datar</p>
+                <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ $calculations->whereNotNull('bangun_datar')->where('bangun_datar', '!=', '')->count() }}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                <i class="fa-solid fa-vector-square text-lg"></i>
+            </div>
+        </div>
 
-<body class="bg-gray-100">
-    <div class="container mx-auto p-4">
-        <header class="mb-6">
-            <h1 class="text-2xl font-bold text-center">Dashboard</h1>
-        </header>
-        <table id="data-table" class="min-w-full bg-white rounded-lg shadow-md overflow-hidden">
-            <thead>
-                <tr class="bg-gray-200 text-left text-sm font-semibold text-gray-700">
-                    <th class="p-4 cursor-pointer" onclick="sortTable(0)">Tanggal</th>
-                    <th class="p-4 cursor-pointer" onclick="sortTable(1)">Nama</th>
-                    <th class="p-4 cursor-pointer" onclick="sortTable(2)">Sekolah</th>
-                    <th class="p-4 cursor-pointer" onclick="sortTable(3)">Usia</th>
-                    <th class="p-4 cursor-pointer" onclick="sortTable(4)">Alamat</th>
-                    <th class="p-4 cursor-pointer" onclick="sortTable(5)">Telepon</th>
-                    <th class="p-4 cursor-pointer" onclick="sortTable(6)">Hasil</th>
-                </tr>
-            </thead>
-            <tbody class="text-gray-700">
-                @foreach ($calculations as $calculation)
-                    <tr class="border-t border-gray-200">
-                        <td class="p-4">
-                            @if ($calculation->created_at)
-                                {{ $calculation->created_at->format('Y-m-d H:i:s') }}
-                            @else
-                                N/A
-                            @endif
-                        </td>
-                        <td class="p-4">{{ $calculation->name }}</td>
-                        <td class="p-4">{{ $calculation->school }}</td>
-                        <td class="p-4">{{ $calculation->age }}</td>
-                        <td class="p-4">{{ $calculation->address }}</td>
-                        <td class="p-4">{{ $calculation->phone }}</td>
-                        <td class="p-4">{{ $calculation->result }}</td>
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bangun Ruang</p>
+                <h3 class="text-2xl font-extrabold text-slate-900 mt-1">{{ $calculations->whereNotNull('bangun_ruang')->where('bangun_ruang', '!=', '')->count() }}</h3>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                <i class="fa-solid fa-cube text-lg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Container -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden space-y-4 p-6">
+        <!-- Live Search Bar -->
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-slate-100 pb-4">
+            <div class="relative w-full sm:w-80">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Cari nama, sekolah, atau hasil..." 
+                       class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
+            </div>
+            <p class="text-xs text-slate-400">Klik judul kolom tabel untuk mengurutkan (Sort)</p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table id="data-table" class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
+                        <th class="p-4 cursor-pointer hover:bg-slate-100 transition" onclick="sortTable(0)">
+                            Tanggal <i class="fa-solid fa-sort text-slate-400 text-xs ml-1"></i>
+                        </th>
+                        <th class="p-4 cursor-pointer hover:bg-slate-100 transition" onclick="sortTable(1)">
+                            Nama <i class="fa-solid fa-sort text-slate-400 text-xs ml-1"></i>
+                        </th>
+                        <th class="p-4 cursor-pointer hover:bg-slate-100 transition" onclick="sortTable(2)">
+                            Sekolah <i class="fa-solid fa-sort text-slate-400 text-xs ml-1"></i>
+                        </th>
+                        <th class="p-4 cursor-pointer hover:bg-slate-100 transition" onclick="sortTable(3)">
+                            Usia <i class="fa-solid fa-sort text-slate-400 text-xs ml-1"></i>
+                        </th>
+                        <th class="p-4 cursor-pointer hover:bg-slate-100 transition" onclick="sortTable(4)">
+                            Alamat <i class="fa-solid fa-sort text-slate-400 text-xs ml-1"></i>
+                        </th>
+                        <th class="p-4 cursor-pointer hover:bg-slate-100 transition" onclick="sortTable(5)">
+                            Telepon <i class="fa-solid fa-sort text-slate-400 text-xs ml-1"></i>
+                        </th>
+                        <th class="p-4 cursor-pointer hover:bg-slate-100 transition" onclick="sortTable(6)">
+                            Bangun Datar <i class="fa-solid fa-sort text-slate-400 text-xs ml-1"></i>
+                        </th>
+                        <th class="p-4 cursor-pointer hover:bg-slate-100 transition" onclick="sortTable(7)">
+                            Bangun Ruang <i class="fa-solid fa-sort text-slate-400 text-xs ml-1"></i>
+                        </th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                    @forelse ($calculations as $calculation)
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <!-- Tanggal -->
+                            <td class="p-4 whitespace-nowrap text-slate-500">
+                                {{ $calculation->created_at ? $calculation->created_at->format('d M Y, H:i') : '-' }}
+                            </td>
+                            <!-- Nama -->
+                            <td class="p-4 font-bold text-slate-900 whitespace-nowrap">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs uppercase">
+                                        {{ substr($calculation->name, 0, 1) }}
+                                    </div>
+                                    <span>{{ $calculation->name }}</span>
+                                </div>
+                            </td>
+                            <!-- Sekolah -->
+                            <td class="p-4 whitespace-nowrap">{{ $calculation->school }}</td>
+                            <!-- Usia -->
+                            <td class="p-4 whitespace-nowrap">
+                                <span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-bold">
+                                    {{ $calculation->age }} th
+                                </span>
+                            </td>
+                            <!-- Alamat -->
+                            <td class="p-4 max-w-xs truncate" title="{{ $calculation->address }}">{{ $calculation->address }}</td>
+                            <!-- Telepon -->
+                            <td class="p-4 whitespace-nowrap text-slate-500">{{ $calculation->phone }}</td>
+                            <!-- Bangun Datar -->
+                            <td class="p-4">
+                                @if ($calculation->bangun_datar)
+                                    <span class="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-semibold">
+                                        {{ $calculation->bangun_datar }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 italic">-</span>
+                                @endif
+                            </td>
+                            <!-- Bangun Ruang -->
+                            <td class="p-4">
+                                @if ($calculation->bangun_ruang)
+                                    <span class="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-xl font-semibold">
+                                        {{ $calculation->bangun_ruang }}
+                                    </span>
+                                @else
+                                    <span class="text-slate-400 italic">-</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="8" class="p-12 text-center text-slate-400">
+                                <i class="fa-solid fa-folder-open text-4xl mb-3 block text-slate-300"></i>
+                                Belum ada data perhitungan. Silakan tambah data baru.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="flex items-center justify-center">
-        <a href="{{ url()->previous() }}"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Kembali</a>
-            <buttont type="button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded" onclick="tableToCSV()">CSV</buttont>
-    </div>
+</div>
+@endsection
 
-    <script type="text/javascript">
-        function tableToCSV() {
+@push('scripts')
+<script>
+    // Real-time table filter
+    function filterTable() {
+        const input = document.getElementById("searchInput");
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById("data-table");
+        const tr = table.getElementsByTagName("tr");
 
-            // Variable to store the final csv data
-            let csv_data = [];
-
-            // Get each row data
-            let rows = document.getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) {
-
-                // Get each column data
-                let cols = rows[i].querySelectorAll('td,th');
-
-                // Stores each csv row data
-                let csvrow = [];
-                for (let j = 0; j < cols.length; j++) {
-
-                    // Get the text data of each cell
-                    // of a row and push it to csvrow
-                    csvrow.push(cols[j].innerHTML);
+        for (let i = 1; i < tr.length; i++) {
+            let visible = false;
+            const td = tr[i].getElementsByTagName("td");
+            for (let j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    const txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        visible = true;
+                        break;
+                    }
                 }
+            }
+            tr[i].style.display = visible ? "" : "none";
+        }
+    }
 
-                // Combine each column value with comma
-                csv_data.push(csvrow.join(","));
+    // Table sorting function
+    function sortTable(n) {
+        let table = document.getElementById("data-table");
+        let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        switching = true;
+        dir = "asc";
+
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+
+                let xVal = x.textContent || x.innerText;
+                let yVal = y.textContent || y.innerText;
+
+                if (n === 3) {
+                    let xNum = parseInt(xVal) || 0;
+                    let yNum = parseInt(yVal) || 0;
+                    if (dir === "asc") {
+                        if (xNum > yNum) { shouldSwitch = true; break; }
+                    } else if (dir === "desc") {
+                        if (xNum < yNum) { shouldSwitch = true; break; }
+                    }
+                } else {
+                    if (dir === "asc") {
+                        if (xVal.toLowerCase() > yVal.toLowerCase()) { shouldSwitch = true; break; }
+                    } else if (dir === "desc") {
+                        if (xVal.toLowerCase() < yVal.toLowerCase()) { shouldSwitch = true; break; }
+                    }
+                }
             }
 
-            // Combine each row data with new line character
-            csv_data = csv_data.join('\n');
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
+            } else {
+                if (switchcount === 0 && dir === "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
 
-            // Call this function to download csv file  
-            downloadCSVFile(csv_data);
-
+    // Clean CSV Export Function
+    function exportTableToCSV(filename) {
+        let csv = [];
+        let rows = document.querySelectorAll("#data-table tr");
+        
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll("td, th");
+            for (let j = 0; j < cols.length; j++) {
+                let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ").trim();
+                data = data.replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(","));
         }
 
-        function downloadCSVFile(csv_data) {
-
-            // Create CSV file object and feed
-            // our csv_data into it
-            CSVFile = new Blob([csv_data], {
-                type: "text/csv"
-            });
-
-            // Create to temporary link to initiate
-            // download process
-            let temp_link = document.createElement('a');
-
-            // Download csv file
-            temp_link.download = "GfG.csv";
-            let url = window.URL.createObjectURL(CSVFile);
-            temp_link.href = url;
-
-            // This link should not be displayed
-            temp_link.style.display = "none";
-            document.body.appendChild(temp_link);
-
-            // Automatically click the link to
-            // trigger download
-            temp_link.click();
-            document.body.removeChild(temp_link);
-        }
-    </script>
-</body>
-
-</html>
+        let csvFile = new Blob([csv.join("\n")], { type: "text/csv;charset=utf-8;" });
+        let downloadLink = document.createElement("a");
+        downloadLink.download = filename;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = "none";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+</script>
+@endpush
